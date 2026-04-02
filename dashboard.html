@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phantom — Exposure Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="dashboard">
+    <header class="dash-header">
+      <h1>Phantom — Exposure Dashboard</h1>
+    </header>
+
+    <div class="top-row">
+      <div class="score-card">
+        <div class="score-label">Privacy Score</div>
+        <div class="score-value" id="privacyScore">0</div>
+        <div class="score-sublabel">Higher = more noise</div>
+      </div>
+
+      <div class="stats-card">
+        <div class="stats-title">Session Stats</div>
+        <div class="stat-line">
+          <span class="stat-key">Ghost mouse events</span>
+          <span class="stat-val" id="statGhost">0</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-key">Phantom clicks</span>
+          <span class="stat-val" id="statClicks">0</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-key">Scroll sequences spoofed</span>
+          <span class="stat-val" id="statScrolls">0</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-key">Keystroke timing events</span>
+          <span class="stat-val" id="statKeys">0</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-key">Persona rotations</span>
+          <span class="stat-val" id="statPersonas">0</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-key">Active persona</span>
+          <span class="stat-val persona-tag" id="statArchetype">---</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-key">Active for</span>
+          <span class="stat-val" id="statUptime">0 min</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="replay-section">
+      <div class="replay-panel">
+        <div class="replay-title">Your Real Behavior</div>
+        <canvas id="canvasReal" width="480" height="320"></canvas>
+        <div class="replay-caption">(clean, identifiable)</div>
+      </div>
+      <div class="replay-panel">
+        <div class="replay-title">What Trackers See</div>
+        <canvas id="canvasNoisy" width="480" height="320"></canvas>
+        <div class="replay-caption">(noisy, anonymous)</div>
+      </div>
+    </div>
+
+    <div class="tracker-section">
+      <div class="tracker-header">Trackers Detected on Current Page</div>
+      <div id="trackerList" class="tracker-list">
+        <div class="tracker-empty">Open a page and click "Scan Current Tab" to detect trackers.</div>
+      </div>
+      <button id="scanBtn" class="scan-btn">Scan Current Tab</button>
+    </div>
+
+    <div class="export-section">
+      <button id="exportBtn" class="export-btn">Export Replay as GIF</button>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

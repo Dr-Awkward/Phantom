@@ -1,0 +1,207 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0d1117;
+  color: #c9d1d9;
+  min-height: 100vh;
+}
+
+.dashboard {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.dash-header h1 {
+  font-size: 22px;
+  color: #f0f6fc;
+  margin-bottom: 24px;
+}
+
+/* ---- Top row: score + stats ---- */
+
+.top-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.score-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  min-width: 180px;
+}
+
+.score-label {
+  font-size: 12px;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.score-value {
+  font-size: 56px;
+  font-weight: 700;
+  color: #58a6ff;
+  line-height: 1;
+}
+
+.score-sublabel {
+  font-size: 11px;
+  color: #8b949e;
+  margin-top: 8px;
+}
+
+.stats-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 20px 24px;
+  flex: 1;
+}
+
+.stats-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0f6fc;
+  margin-bottom: 12px;
+}
+
+.stat-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.stat-key { color: #8b949e; }
+.stat-val { color: #c9d1d9; font-weight: 500; }
+
+.persona-tag {
+  color: #7ee787 !important;
+  font-style: italic;
+}
+
+/* ---- Replay canvases ---- */
+
+.replay-section {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.replay-panel {
+  flex: 1;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.replay-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f0f6fc;
+  margin-bottom: 10px;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: #0d1117;
+  border: 1px solid #21262d;
+}
+
+.replay-caption {
+  font-size: 11px;
+  color: #8b949e;
+  margin-top: 8px;
+}
+
+/* ---- Tracker detection ---- */
+
+.tracker-section {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+
+.tracker-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0f6fc;
+  margin-bottom: 12px;
+}
+
+.tracker-list {
+  margin-bottom: 14px;
+}
+
+.tracker-empty {
+  font-size: 13px;
+  color: #8b949e;
+  padding: 8px 0;
+}
+
+.tracker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #21262d;
+}
+
+.tracker-item:last-child { border-bottom: none; }
+
+.tracker-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.tracker-name {
+  font-weight: 500;
+  color: #c9d1d9;
+}
+
+.tracker-desc {
+  color: #8b949e;
+  margin-left: 4px;
+}
+
+.tracker-poisoned {
+  color: #3fb950;
+  margin-left: auto;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.scan-btn, .export-btn {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.scan-btn:hover, .export-btn:hover {
+  background: #30363d;
+}
+
+/* ---- Export ---- */
+
+.export-section {
+  text-align: center;
+}

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phantom — Settings</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #f0f6fc;
+      margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+      color: #8b949e;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .section {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #f0f6fc;
+      background: #1c2128;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .option-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .option-row:last-child { border-bottom: none; }
+
+    .option-info { flex: 1; }
+
+    .option-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #c9d1d9;
+    }
+
+    .option-desc {
+      font-size: 12px;
+      color: #8b949e;
+      margin-top: 2px;
+    }
+
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+
+    .switch input { display: none; }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #30363d;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: #c9d1d9;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .switch input:checked + .slider { background: #238636; }
+    .switch input:checked + .slider::before { transform: translateX(18px); }
+
+    select {
+      background: #0d1117;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      margin-left: 16px;
+      cursor: pointer;
+    }
+
+    select:focus { outline: 1px solid #58a6ff; }
+
+    input[type="number"] {
+      background: #0d1117;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      width: 70px;
+      margin-left: 16px;
+    }
+
+    input[type="number"]:focus { outline: 1px solid #58a6ff; }
+
+    .checkbox-group {
+      padding: 12px 16px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      accent-color: #238636;
+    }
+
+    .checkbox-row label {
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    textarea {
+      background: #0d1117;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 13px;
+      font-family: monospace;
+      width: 100%;
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    textarea:focus { outline: 1px solid #58a6ff; }
+
+    .whitelist-section {
+      padding: 12px 16px;
+    }
+
+    .whitelist-hint {
+      font-size: 11px;
+      color: #8b949e;
+      margin-top: 6px;
+    }
+
+    .remote-whitelist {
+      font-size: 12px;
+      color: #8b949e;
+      line-height: 1.8;
+      font-family: monospace;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .remote-whitelist span {
+      display: inline-block;
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin: 2px 4px 2px 0;
+      font-size: 11px;
+    }
+
+    .save-status {
+      font-size: 12px;
+      color: #3fb950;
+      padding: 0 16px 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Phantom</h1>
+    <p class="page-subtitle">Settings</p>
+
+    <div class="section">
+      <div class="section-header">Ghost Search (V1)</div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Enable ghost searches</div>
+          <div class="option-desc">Send decoy queries to search engines</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="searchEnabled" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Search interval (minutes)</div>
+          <div class="option-desc">Time between ghost searches</div>
+        </div>
+        <input type="number" id="searchInterval" min="1" max="120" value="10">
+      </div>
+      <div class="section-header">Search Engines</div>
+      <div class="checkbox-group">
+        <div class="checkbox-row">
+          <input type="checkbox" id="engGoogle" checked>
+          <label for="engGoogle">Google</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="engBing" checked>
+          <label for="engBing">Bing</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="engYahoo" checked>
+          <label for="engYahoo">Yahoo</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="engDuckduckgo" checked>
+          <label for="engDuckduckgo">DuckDuckGo</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">Phantom Engine (V2)</div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Enable Phantom</div>
+          <div class="option-desc">Master toggle for behavioral noise</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="phantomEnabled" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Mouse noise</div>
+          <div class="option-desc">Ghost cursor trajectories</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="mouseNoise" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Scroll noise</div>
+          <div class="option-desc">Synthetic scroll patterns</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="scrollNoise" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Click noise</div>
+          <div class="option-desc">Phantom clicks on safe elements</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="clickNoise" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Hover noise</div>
+          <div class="option-desc">Dwell time poisoning</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="hoverNoise" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Keystroke noise</div>
+          <div class="option-desc">Timing injection for modifier keys</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="keystrokeNoise" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Noise intensity</div>
+          <div class="option-desc">Controls frequency of noise generation</div>
+        </div>
+        <select id="noiseIntensity">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Persona rotation</div>
+          <div class="option-desc">How often the behavioral persona changes</div>
+        </div>
+        <select id="personaRotation">
+          <option value="auto" selected>Auto (30-120 min)</option>
+          <option value="fast">Fast (10-30 min)</option>
+          <option value="slow">Slow (60-180 min)</option>
+        </select>
+      </div>
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Dashboard recording</div>
+          <div class="option-desc">Track real vs. spoofed for visualization</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="dashboardRecording" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">Whitelist — Your Domains</div>
+      <div class="whitelist-section">
+        <textarea id="whitelist" placeholder="example.com&#10;bank.example.com&#10;healthcare.example.com"></textarea>
+        <div class="whitelist-hint">One domain per line. Phantom is disabled on these sites. Add banking, healthcare, and other sensitive sites.</div>
+      </div>
+      <div class="section-header">Community Whitelist (auto-updated)</div>
+      <div class="whitelist-section">
+        <div id="remoteWhitelistList" class="remote-whitelist">Loading...</div>
+        <div class="whitelist-hint">Maintained by the Phantom project. Updated automatically. These cannot be removed — add your own overrides above.</div>
+      </div>
+    </div>
+
+    <div class="save-status" id="saveStatus">Settings saved</div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

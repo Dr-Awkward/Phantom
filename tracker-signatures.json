@@ -1,0 +1,104 @@
+{
+  "trackers": [
+    {
+      "name": "Google Analytics",
+      "patterns": ["google-analytics.com/analytics", "googletagmanager.com/gtag", "ga.js", "gtag.js", "analytics.js"],
+      "collects": "Pageviews, events, user timing, demographics"
+    },
+    {
+      "name": "Google Tag Manager",
+      "patterns": ["googletagmanager.com/gtm.js"],
+      "collects": "Triggers and routes data to other analytics services"
+    },
+    {
+      "name": "Facebook Pixel",
+      "patterns": ["connect.facebook.net/en_US/fbevents.js", "facebook.com/tr"],
+      "collects": "Conversions, page views, custom events, behavioral data"
+    },
+    {
+      "name": "Hotjar",
+      "patterns": ["static.hotjar.com", "hotjar.js", "hotjar.com/c/hotjar"],
+      "collects": "Session replay, heatmaps, click maps, scroll depth"
+    },
+    {
+      "name": "FullStory",
+      "patterns": ["fullstory.com/s/fs.js", "edge.fullstory.com"],
+      "collects": "Full session replay, mouse movement, clicks, form interactions"
+    },
+    {
+      "name": "Microsoft Clarity",
+      "patterns": ["clarity.ms/tag", "clarity.ms/s"],
+      "collects": "Session replay, heatmaps, scroll depth, rage clicks"
+    },
+    {
+      "name": "Mixpanel",
+      "patterns": ["cdn.mxpnl.com", "mixpanel.com/track"],
+      "collects": "Events, user profiles, funnels, retention"
+    },
+    {
+      "name": "Segment",
+      "patterns": ["cdn.segment.com/analytics.js", "api.segment.io"],
+      "collects": "Events routed to multiple downstream analytics tools"
+    },
+    {
+      "name": "Heap Analytics",
+      "patterns": ["heap-analytics.com", "heapanalytics.com/js"],
+      "collects": "Auto-captured clicks, pageviews, form submissions"
+    },
+    {
+      "name": "Amplitude",
+      "patterns": ["cdn.amplitude.com", "api.amplitude.com"],
+      "collects": "Events, user properties, behavioral cohorts"
+    },
+    {
+      "name": "Lucky Orange",
+      "patterns": ["luckyorange.com", "luckyorange.net"],
+      "collects": "Session recordings, heatmaps, chat, form analytics"
+    },
+    {
+      "name": "Mouseflow",
+      "patterns": ["mouseflow.com/projects", "cdn.mouseflow.com"],
+      "collects": "Session replay, heatmaps, funnels, form analytics"
+    },
+    {
+      "name": "Crazy Egg",
+      "patterns": ["script.crazyegg.com", "crazyegg.com/pages"],
+      "collects": "Heatmaps, scroll maps, click reports, session recordings"
+    },
+    {
+      "name": "Adobe Analytics",
+      "patterns": ["omtrdc.net", "demdex.net", "2o7.net"],
+      "collects": "Pageviews, events, visitor profiles, segmentation"
+    },
+    {
+      "name": "Pendo",
+      "patterns": ["pendo.io/agent", "cdn.pendo.io"],
+      "collects": "Product usage, feature adoption, user guides"
+    },
+    {
+      "name": "Intercom",
+      "patterns": ["widget.intercom.io", "intercom.io/widget"],
+      "collects": "User identity, page visits, conversation data"
+    },
+    {
+      "name": "Hubspot",
+      "patterns": ["js.hs-scripts.com", "js.hs-analytics.net", "hubspot.com/analytics"],
+      "collects": "Page views, form submissions, email tracking"
+    },
+    {
+      "name": "Snapchat Pixel",
+      "patterns": ["sc-static.net/scevent.min.js"],
+      "collects": "Conversions, page views, behavioral events"
+    },
+    {
+      "name": "TikTok Pixel",
+      "patterns": ["analytics.tiktok.com"],
+      "collects": "Conversions, page views, click events"
+    },
+    {
+      "name": "LinkedIn Insight",
+      "patterns": ["snap.licdn.com/li.lms-analytics"],
+      "collects": "Page views, conversions, demographic targeting"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phantom — Unit Tests</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 32px;
+    }
+    h1 { font-size: 20px; color: #f0f6fc; margin-bottom: 8px; }
+    .summary {
+      font-size: 14px;
+      margin-bottom: 24px;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #30363d;
+    }
+    .summary.pass { background: #0d2818; border-color: #238636; color: #3fb950; }
+    .summary.fail { background: #280d0d; border-color: #da3633; color: #f85149; }
+    .summary.running { background: #161b22; color: #8b949e; }
+    .suite {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .suite-header {
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #1c2128;
+      border-bottom: 1px solid #30363d;
+    }
+    .test-row {
+      padding: 6px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid #21262d;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .test-row:last-child { border-bottom: none; }
+    .icon-pass { color: #3fb950; }
+    .icon-fail { color: #f85149; }
+    .test-name { flex: 1; }
+    .test-error {
+      font-size: 11px;
+      color: #f85149;
+      padding: 4px 14px 8px 30px;
+      background: #1a0d0d;
+    }
+  </style>
+</head>
+<body>
+  <h1>Phantom — Unit Tests</h1>
+  <div class="summary running" id="summary">Running tests...</div>
+  <div id="results"></div>
+
+  <!-- Load the modules under test (browser context, no chrome APIs needed for unit logic) -->
+  <script>
+    // Mock chrome.storage.sync for modules that call it on load
+    window.chrome = {
+      storage: {
+        sync: {
+          get: function(key, cb) { if (cb) cb({}); return Promise.resolve({}); },
+          set: function(obj, cb) { if (cb) cb(); return Promise.resolve(); }
+        },
+        onChanged: {
+          addListener: function() {}
+        }
+      },
+      runtime: {
+        onMessage: { addListener: function() {} },
+        getURL: function(path) { return path; },
+        sendMessage: function() {},
+        lastError: null
+      },
+      tabs: {
+        query: function() { return Promise.resolve([]); },
+        sendMessage: function() {}
+      },
+      alarms: {
+        create: function() {},
+        clearAll: function(cb) { if (cb) cb(); },
+        onAlarm: { addListener: function() {} }
+      },
+      scripting: {
+        executeScript: function() { return Promise.resolve([]); }
+      }
+    };
+  </script>
+  <script src="../phantom-persona.js"></script>
+  <script src="../phantom-mouse.js"></script>
+  <script src="../phantom-scroll.js"></script>
+  <script src="../phantom-click.js"></script>
+  <script src="../phantom-hover.js"></script>
+  <script src="../phantom-keystroke.js"></script>
+  <script src="test.js"></script>
+</body>
+</html>
