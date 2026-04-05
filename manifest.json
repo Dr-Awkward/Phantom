@@ -19,6 +19,13 @@
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],
+      "js": ["phantom-inject.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": ["https://*/*", "http://*/*"],
       "js": [
         "phantom-persona.js",
         "phantom-mouse.js",

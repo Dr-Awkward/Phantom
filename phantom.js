@@ -1,74 +1,10 @@
 // ============================================================
-// Phantom — EventListener Interception Layer + Orchestrator
-// Injected at document_start via content script
+// Phantom Engine — Orchestrator (ISOLATED content-script world)
+// Coordinates noise modules, manages settings, communicates
+// with background.js and the MAIN-world interception layer.
 // ============================================================
 
-(function() {
-  'use strict';
-
-  // ---- Preserve originals before anyone else touches them ----
-
-  const _addEventListener    = EventTarget.prototype.addEventListener;
-  const _removeEventListener = EventTarget.prototype.removeEventListener;
-  const _dispatchEvent       = EventTarget.prototype.dispatchEvent;
-
-  const listenerMap = new WeakMap();
-
-  const INTERCEPTED_EVENTS = new Set([
-    'mousemove', 'click', 'mousedown', 'mouseup',
-    'mouseenter', 'mouseleave', 'mouseover', 'mouseout',
-    'scroll', 'wheel',
-    'pointerdown', 'pointerup', 'pointermove',
-    'touchstart', 'touchmove', 'touchend',
-    'keydown', 'keyup'
-  ]);
-
-  EventTarget.prototype.addEventListener = function(type, listener, options) {
-    if (!INTERCEPTED_EVENTS.has(type) || !listener) {
-      return _addEventListener.call(this, type, listener, options);
-    }
-
-    const element = this;
-
-    const wrappedListener = function(event) {
-      listener.call(element, event);
-
-      if (PhantomEngine.isActive()) {
-        PhantomEngine.injectNoise(type, event, element, listener);
-      }
-    };
-
-    if (!listenerMap.has(listener)) {
-      listenerMap.set(listener, new Map());
-    }
-    listenerMap.get(listener).set(type, wrappedListener);
-
-    return _addEventListener.call(this, type, wrappedListener, options);
-  };
-
-  EventTarget.prototype.removeEventListener = function(type, listener, options) {
-    if (listenerMap.has(listener)) {
-      const typeMap = listenerMap.get(listener);
-      if (typeMap.has(type)) {
-        const wrapped = typeMap.get(type);
-        typeMap.delete(type);
-        return _removeEventListener.call(this, type, wrapped, options);
-      }
-    }
-    return _removeEventListener.call(this, type, listener, options);
-  };
-
-  window.__phantomOriginals = {
-    addEventListener: _addEventListener,
-    removeEventListener: _removeEventListener,
-    dispatchEvent: _dispatchEvent
-  };
-
-})();
-
-// ============================================================
-// Phantom Engine — Orchestrator
-// ============================================================
+'use strict';
 
 const PhantomEngine = {
 
@@ -85,26 +21,47 @@ const PhantomEngine = {
   async init() {
     // Check whitelist before doing anything
     const domain = window.location.hostname;
-    const whitelistResult = await new Promise(resolve => {
-      chrome.runtime.sendMessage({ type: 'isWhitelisted', domain }, (resp) => {
-        resolve(resp && resp.whitelisted);
+    try {
+      const whitelistResult = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({ type: 'isWhitelisted', domain }, (resp) => {
+          if (chrome.runtime.lastError) {
+            resolve(false);
+            return;
+          }
+          resolve(resp && resp.whitelisted);
+        });
       });
-    });
-    if (whitelistResult) {
-      this.active = false;
-      return;
+      if (whitelistResult) {
+        this.active = false;
+        this.broadcastState();
+        return;
+      }
+    } catch (e) {
+      // If message fails, proceed (assume not whitelisted)
     }
 
-    const result = await new Promise(resolve => {
-      chrome.storage.sync.get('phantom_settings', resolve);
-    });
-    const settings = result.phantom_settings || {};
-    this.active = settings.phantomEnabled !== false;
-    this.settings = settings;
+    try {
+      const result = await new Promise((resolve) => {
+        chrome.storage.sync.get('phantom_settings', (data) => {
+          if (chrome.runtime.lastError) {
+            resolve({});
+            return;
+          }
+          resolve(data);
+        });
+      });
+      const settings = result.phantom_settings || {};
+      this.active = settings.phantomEnabled !== false;
+      this.settings = settings;
+    } catch (e) {
+      this.active = true;
+      this.settings = {};
+    }
 
     if (this.active) {
       PersonaEngine.generate();
       this.stats.personaRotations = 1;
+      this.broadcastState();
       this.startActivityCycle();
     }
 
@@ -118,8 +75,28 @@ const PhantomEngine = {
         } else if (!this.active && wasActive) {
           this.disable();
         }
+        this.broadcastState();
       }
     });
+  },
+
+  // ---- Send state to the MAIN-world interception layer ----
+
+  broadcastState() {
+    try {
+      window.postMessage({
+        type: '__phantom_state__',
+        active: this.active,
+        persona: PersonaEngine.currentPersona,
+        intensity: this.getIntensityMultiplier(),
+        modules: {
+          mouse: this.isModuleEnabled('mouse'),
+          keystroke: this.isModuleEnabled('keystroke')
+        }
+      }, '*');
+    } catch (e) {
+      // postMessage failed — non-critical
+    }
   },
 
   isActive() {
@@ -141,106 +118,78 @@ const PhantomEngine = {
     }
   },
 
-  // ---- Called by EventListener intercept layer ----
-
-  injectNoise(eventType, realEvent, element, listener) {
-    const persona = PersonaEngine.get();
-
-    switch (eventType) {
-      case 'mousemove':
-        if (this.isModuleEnabled('mouse')) {
-          this.handleMouseNoise(realEvent, element, listener, persona);
-        }
-        break;
-      case 'keydown':
-      case 'keyup':
-        if (this.isModuleEnabled('keystroke')) {
-          KeystrokeSynth.injectTimingNoise(realEvent, listener, element);
-          this.stats.keystrokeEvents++;
-        }
-        break;
-    }
-  },
-
-  handleMouseNoise(realEvent, element, listener, persona) {
-    if (Math.random() < 0.25 * persona.mouseSpeed * this.getIntensityMultiplier()) {
-      const offsetX = 200 + Math.random() * 300;
-      const offsetY = -50 + Math.random() * 100;
-      const ghostEvent = MouseSynth.createMouseEvent(
-        'mousemove',
-        realEvent.clientX + offsetX,
-        realEvent.clientY + offsetY,
-        realEvent
-      );
-      setTimeout(() => {
-        listener.call(element, ghostEvent);
-        this.stats.ghostMouseEvents++;
-      }, 5 + Math.random() * 20);
-    }
-  },
-
   // ---- Activity cycle ----
 
   startActivityCycle() {
     const cycle = async () => {
       if (!this.active) return;
 
-      const persona = PersonaEngine.get();
-      const intensity = this.getIntensityMultiplier();
-      const burstEnd = Date.now() + persona.activityBurstLen * intensity;
+      try {
+        const persona = PersonaEngine.get();
+        const intensity = this.getIntensityMultiplier();
+        const burstEnd = Date.now() + persona.activityBurstLen * intensity;
 
-      while (Date.now() < burstEnd && this.active) {
-        const action = Math.random();
+        while (Date.now() < burstEnd && this.active) {
+          const action = Math.random();
 
-        if (action < 0.3 && this.isModuleEnabled('mouse')) {
-          const dest = MouseSynth.pickDestination();
-          const path = MouseSynth.generatePath(
-            MouseSynth.ghostX, MouseSynth.ghostY,
-            dest.x, dest.y,
-            15 + Math.floor(Math.random() * 20)
-          );
-          for (const point of path) {
-            if (!this.active) return;
-            const event = MouseSynth.createMouseEvent('mousemove', point.x, point.y);
-            const target = document.elementFromPoint(point.x, point.y);
-            if (target) target.dispatchEvent(event);
-            MouseSynth.ghostX = point.x;
-            MouseSynth.ghostY = point.y;
-            this.stats.ghostMouseEvents++;
-            await sleep(point.delay / persona.mouseSpeed);
+          try {
+            if (action < 0.3 && this.isModuleEnabled('mouse')) {
+              const dest = MouseSynth.pickDestination();
+              const path = MouseSynth.generatePath(
+                MouseSynth.ghostX, MouseSynth.ghostY,
+                dest.x, dest.y,
+                15 + Math.floor(Math.random() * 20)
+              );
+              for (const point of path) {
+                if (!this.active) return;
+                const event = MouseSynth.createMouseEvent('mousemove', point.x, point.y);
+                const target = document.elementFromPoint(point.x, point.y);
+                if (target) target.dispatchEvent(event);
+                MouseSynth.ghostX = point.x;
+                MouseSynth.ghostY = point.y;
+                this.stats.ghostMouseEvents++;
+                await sleep(point.delay / persona.mouseSpeed);
+              }
+            }
+            else if (action < 0.5 && this.isModuleEnabled('hover')) {
+              await HoverSynth.performHoverSequence();
+            }
+            else if (action < 0.65 && this.isModuleEnabled('click')) {
+              if (Math.random() < persona.rageClickChance) {
+                await ClickSynth.performRageClick();
+              } else {
+                await ClickSynth.performPhantomClick();
+              }
+              this.stats.phantomClicks++;
+            }
+            else if (action < 0.8 && this.isModuleEnabled('scroll')) {
+              const patterns = Object.keys(ScrollSynth.patterns);
+              const pattern = persona.preferredPattern ||
+                patterns[Math.floor(Math.random() * patterns.length)];
+              await ScrollSynth.runPattern(pattern);
+              this.stats.scrollSpoofs++;
+            }
+            else if (this.isModuleEnabled('keystroke')) {
+              await KeystrokeSynth.performIdleKeystroke();
+              this.stats.keystrokeEvents++;
+            }
+          } catch (e) {
+            // Individual action failed — continue cycle
           }
-        }
-        else if (action < 0.5 && this.isModuleEnabled('hover')) {
-          await HoverSynth.performHoverSequence();
-        }
-        else if (action < 0.65 && this.isModuleEnabled('click')) {
-          if (Math.random() < persona.rageClickChance) {
-            await ClickSynth.performRageClick();
-          } else {
-            await ClickSynth.performPhantomClick();
-          }
-          this.stats.phantomClicks++;
-        }
-        else if (action < 0.8 && this.isModuleEnabled('scroll')) {
-          const patterns = Object.keys(ScrollSynth.patterns);
-          const pattern = persona.preferredPattern ||
-            patterns[Math.floor(Math.random() * patterns.length)];
-          await ScrollSynth.runPattern(pattern);
-          this.stats.scrollSpoofs++;
-        }
-        else if (this.isModuleEnabled('keystroke')) {
-          await KeystrokeSynth.performIdleKeystroke();
-          this.stats.keystrokeEvents++;
+
+          await sleep(500 + Math.random() * 2000);
         }
 
-        await sleep(500 + Math.random() * 2000);
-      }
+        await sleep(persona.idlePeriodLen);
 
-      await sleep(persona.idlePeriodLen);
-
-      if (PersonaEngine.isExpired()) {
-        PersonaEngine.generate();
-        this.stats.personaRotations++;
+        if (PersonaEngine.isExpired()) {
+          PersonaEngine.generate();
+          this.stats.personaRotations++;
+          this.broadcastState();
+        }
+      } catch (e) {
+        // Cycle error — wait and retry
+        await sleep(5000);
       }
 
       if (this.active) cycle();
@@ -253,11 +202,13 @@ const PhantomEngine = {
     this.active = true;
     PersonaEngine.generate();
     this.stats.personaRotations++;
+    this.broadcastState();
     this.startActivityCycle();
   },
 
   disable() {
     this.active = false;
+    this.broadcastState();
   },
 
   getStats() {

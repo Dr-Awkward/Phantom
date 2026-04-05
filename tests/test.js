@@ -32,6 +32,23 @@ function assertInRange(val, min, max, msg) {
   assert(val >= min && val <= max, msg || `Expected ${val} to be in range [${min}, ${max}]`);
 }
 
+// Helper: load JSON — tries local path first, falls back to GitHub raw URL.
+// Local fetch works via localhost or extension context; GitHub fallback
+// handles file:// protocol where Chrome blocks all local network requests.
+const GITHUB_RAW = 'https://raw.githubusercontent.com/Dr-Awkward/phantom/main/';
+
+async function loadJSON(localPath, filename) {
+  try {
+    const response = await fetch(localPath);
+    if (response.ok) return await response.json();
+  } catch (e) { /* local fetch blocked — expected on file:// */ }
+
+  // Fallback: fetch from GitHub
+  const response = await fetch(GITHUB_RAW + filename);
+  if (!response.ok) throw new Error('Failed to load ' + filename + ' (HTTP ' + response.status + ')');
+  return await response.json();
+}
+
 // ============================================================
 // Test suites
 // ============================================================
@@ -292,8 +309,7 @@ describe('HoverSynth', () => {
 
 describe('Manifest Structure', () => {
   it('seeds.json is valid JSON with an array of strings', async () => {
-    const response = await fetch('../seeds.json');
-    const data = await response.json();
+    const data = await loadJSON('../seeds.json', 'seeds.json');
     assert(Array.isArray(data), 'seeds.json should be an array');
     assert(data.length > 0, 'seeds.json should not be empty');
     for (const item of data) {
@@ -302,8 +318,7 @@ describe('Manifest Structure', () => {
   });
 
   it('tracker-signatures.json has valid structure', async () => {
-    const response = await fetch('../tracker-signatures.json');
-    const data = await response.json();
+    const data = await loadJSON('../tracker-signatures.json', 'tracker-signatures.json');
     assert(data.trackers, 'Should have trackers array');
     assert(Array.isArray(data.trackers), 'trackers should be an array');
     for (const t of data.trackers) {
