@@ -76,8 +76,11 @@ phantomToggle.addEventListener('change', async () => {
   updateStatusDot();
 });
 
-dashboardLink.addEventListener('click', () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+dashboardLink.addEventListener('click', async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const base = chrome.runtime.getURL('dashboard.html');
+  const url = tab && tab.id ? base + '?tab=' + tab.id : base;
+  chrome.tabs.create({ url });
 });
 
 optionsLink.addEventListener('click', () => {

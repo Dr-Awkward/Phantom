@@ -37,6 +37,7 @@ const DEFAULT_SETTINGS = {
   noiseIntensity: 'medium',
   personaRotation: 'auto',
   dashboardRecording: true,
+  iframeNoise: true,
   whitelist: []
 };
 
@@ -233,6 +234,26 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'checkUpdate') {
     chrome.storage.local.get('phantom_update_available', (result) => {
       sendResponse(result.phantom_update_available || null);
+    });
+    return true;
+  }
+  if (msg.type === 'flushStats') {
+    chrome.storage.session.get('phantom_session_stats', (result) => {
+      const session = result.phantom_session_stats || {
+        ghostMouseEvents: 0, phantomClicks: 0, scrollSpoofs: 0,
+        keystrokeEvents: 0, personaRotations: 0, startTime: Date.now()
+      };
+      for (const key of ['ghostMouseEvents', 'phantomClicks', 'scrollSpoofs', 'keystrokeEvents', 'personaRotations']) {
+        session[key] += (msg.stats[key] || 0);
+      }
+      chrome.storage.session.set({ phantom_session_stats: session });
+      sendResponse({ ok: true });
+    });
+    return true;
+  }
+  if (msg.type === 'getSessionStats') {
+    chrome.storage.session.get('phantom_session_stats', (result) => {
+      sendResponse(result.phantom_session_stats || null);
     });
     return true;
   }

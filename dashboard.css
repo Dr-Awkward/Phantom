@@ -16,8 +16,61 @@ body {
 .dash-header h1 {
   font-size: 22px;
   color: #f0f6fc;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
+
+.target-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 6px 10px;
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.target-label {
+  color: #8b949e;
+  flex-shrink: 0;
+}
+
+.target-select {
+  flex: 1;
+  background: #161b22;
+  color: #58a6ff;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.target-select:focus { outline: 1px solid #58a6ff; }
+
+.refresh-tabs-btn {
+  background: #21262d;
+  color: #8b949e;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.refresh-tabs-btn:hover { background: #30363d; color: #c9d1d9; }
+
+.target-hint {
+  font-size: 11px;
+  color: #d29922;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.target-hint.visible { display: block; }
 
 /* ---- Top row: score + stats ---- */
 
@@ -65,11 +118,29 @@ body {
   flex: 1;
 }
 
-.stats-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #f0f6fc;
+.stats-title-row {
+  display: flex;
+  gap: 4px;
   margin-bottom: 12px;
+}
+
+.stats-tab {
+  font-size: 12px;
+  font-weight: 500;
+  color: #8b949e;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.stats-tab:hover {
+  color: #c9d1d9;
+}
+
+.stats-tab.active {
+  background: #21262d;
+  color: #f0f6fc;
 }
 
 .stat-line {
@@ -85,6 +156,88 @@ body {
 .persona-tag {
   color: #7ee787 !important;
   font-style: italic;
+}
+
+/* ---- Diagnostic section ---- */
+
+.diagnostic-section {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+
+.diagnostic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.diagnostic-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+.diagnostic-empty {
+  font-size: 13px;
+  color: #8b949e;
+  padding: 8px 0;
+}
+
+.diag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #21262d;
+}
+
+.diag-row:last-child { border-bottom: none; }
+
+.diag-icon {
+  font-size: 15px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.diag-icon.pass { color: #3fb950; }
+.diag-icon.fail { color: #f85149; }
+.diag-icon.warn { color: #d29922; }
+
+.diag-label {
+  font-weight: 500;
+  color: #c9d1d9;
+  min-width: 180px;
+}
+
+.diag-detail {
+  color: #8b949e;
+  flex: 1;
+}
+
+.diag-summary {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.diag-summary.all-pass {
+  background: #0d2818;
+  border: 1px solid #238636;
+  color: #3fb950;
+}
+
+.diag-summary.has-fail {
+  background: #280d0d;
+  border: 1px solid #da3633;
+  color: #f85149;
 }
 
 /* ---- Replay canvases ---- */

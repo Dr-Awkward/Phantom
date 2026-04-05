@@ -22,7 +22,7 @@
       "js": ["phantom-inject.js"],
       "run_at": "document_start",
       "world": "MAIN",
-      "all_frames": false
+      "all_frames": true
     },
     {
       "matches": ["https://*/*", "http://*/*"],
@@ -36,7 +36,7 @@
         "phantom.js"
       ],
       "run_at": "document_start",
-      "all_frames": false
+      "all_frames": true
     }
   ],
   "action": {

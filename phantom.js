@@ -9,6 +9,8 @@
 const PhantomEngine = {
 
   active: false,
+  recentPositions: [],
+  _lastFlushedStats: null,
   stats: {
     ghostMouseEvents: 0,
     phantomClicks: 0,
@@ -58,11 +60,25 @@ const PhantomEngine = {
       this.settings = {};
     }
 
+    // Skip iframes if user disabled iframe noise
+    if (window !== window.top && this.settings.iframeNoise === false) {
+      this.active = false;
+      this.broadcastState();
+      return;
+    }
+
     if (this.active) {
       PersonaEngine.generate();
       this.stats.personaRotations = 1;
       this.broadcastState();
       this.startActivityCycle();
+
+      // Record mouse positions for dashboard replay
+      document.addEventListener('mousemove', (e) => {
+        this.recordPosition(e.clientX, e.clientY, !e.isTrusted);
+      }, true);
+
+      this.startSessionFlush();
     }
 
     chrome.storage.onChanged.addListener((changes) => {
@@ -97,6 +113,36 @@ const PhantomEngine = {
     } catch (e) {
       // postMessage failed — non-critical
     }
+  },
+
+  recordPosition(x, y, ghost) {
+    if (this.recentPositions.length >= 200) {
+      this.recentPositions.shift();
+    }
+    this.recentPositions.push({ x, y, ghost });
+  },
+
+  startSessionFlush() {
+    setInterval(() => {
+      if (!this.active) return;
+      const current = this.stats;
+      const last = this._lastFlushedStats || {
+        ghostMouseEvents: 0, phantomClicks: 0, scrollSpoofs: 0,
+        keystrokeEvents: 0, personaRotations: 0
+      };
+      const delta = {};
+      let hasChanges = false;
+      for (const key of ['ghostMouseEvents', 'phantomClicks', 'scrollSpoofs', 'keystrokeEvents', 'personaRotations']) {
+        delta[key] = (current[key] || 0) - (last[key] || 0);
+        if (delta[key] > 0) hasChanges = true;
+      }
+      if (hasChanges) {
+        chrome.runtime.sendMessage({ type: 'flushStats', stats: delta }, () => {
+          if (chrome.runtime.lastError) return;
+        });
+      }
+      this._lastFlushedStats = { ...current };
+    }, 30000);
   },
 
   isActive() {
@@ -215,7 +261,10 @@ const PhantomEngine = {
     return {
       ...this.stats,
       persona: PersonaEngine.get()?.archetype || 'none',
-      uptimeMinutes: Math.round((Date.now() - this.stats.startTime) / 60000)
+      uptimeMinutes: Math.round((Date.now() - this.stats.startTime) / 60000),
+      recentPositions: this.recentPositions,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight
     };
   }
 };

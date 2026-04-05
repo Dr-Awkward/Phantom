@@ -11,6 +11,7 @@ const FIELDS = {
   keystrokeNoise:    { type: 'checkbox' },
   noiseIntensity:    { type: 'select' },
   personaRotation:   { type: 'select' },
+  iframeNoise:       { type: 'checkbox' },
   dashboardRecording:{ type: 'checkbox' }
 };
 

@@ -28,6 +28,11 @@
     'keydown', 'keyup'
   ]);
 
+  // Events blocked by Permissions Policy on many sites.
+  // Pass these directly to the original without routing through our wrapper
+  // to avoid Chrome attributing the policy violation to this file.
+  var POLICY_BLOCKED = new Set(['unload', 'beforeunload']);
+
   var PHANTOM_KEYS = [
     { key: 'Shift',   code: 'ShiftLeft',   keyCode: 16 },
     { key: 'Control', code: 'ControlLeft', keyCode: 17 },
@@ -38,6 +43,11 @@
   // ---- Wrap addEventListener ----
 
   EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (POLICY_BLOCKED.has(type)) {
+      try { return _addEventListener.call(this, type, listener, options); } catch(e) {}
+      return;
+    }
+
     if (!INTERCEPTED.has(type) || !listener) {
       return _addEventListener.call(this, type, listener, options);
     }

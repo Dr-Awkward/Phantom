@@ -9,6 +9,14 @@
   <div class="dashboard">
     <header class="dash-header">
       <h1>Phantom — Exposure Dashboard</h1>
+      <div class="target-tab">
+        <span class="target-label">Monitoring:</span>
+        <select id="targetSelect" class="target-select">
+          <option value="">Loading tabs...</option>
+        </select>
+        <button id="refreshTabs" class="refresh-tabs-btn" title="Refresh tab list">&#8635;</button>
+      </div>
+      <div class="target-hint" id="targetHint">Pick a website tab above, then run the diagnostic.</div>
     </header>
 
     <div class="top-row">
@@ -19,7 +27,10 @@
       </div>
 
       <div class="stats-card">
-        <div class="stats-title">Session Stats</div>
+        <div class="stats-title-row">
+          <span class="stats-tab active" id="tabPage">This Page</span>
+          <span class="stats-tab" id="tabSession">Full Session</span>
+        </div>
         <div class="stat-line">
           <span class="stat-key">Ghost mouse events</span>
           <span class="stat-val" id="statGhost">0</span>
@@ -51,6 +62,16 @@
       </div>
     </div>
 
+    <div class="diagnostic-section">
+      <div class="diagnostic-header">
+        <span class="diagnostic-title">System Status</span>
+        <button id="diagBtn" class="scan-btn">Run Diagnostic</button>
+      </div>
+      <div id="diagResults" class="diagnostic-results">
+        <div class="diagnostic-empty">Click "Run Diagnostic" to verify all components.</div>
+      </div>
+    </div>
+
     <div class="replay-section">
       <div class="replay-panel">
         <div class="replay-title">Your Real Behavior</div>
@@ -65,15 +86,15 @@
     </div>
 
     <div class="tracker-section">
-      <div class="tracker-header">Trackers Detected on Current Page</div>
+      <div class="tracker-header">Trackers Detected on Monitored Page</div>
       <div id="trackerList" class="tracker-list">
-        <div class="tracker-empty">Open a page and click "Scan Current Tab" to detect trackers.</div>
+        <div class="tracker-empty">Click "Scan Monitored Tab" to detect trackers on the page you're watching.</div>
       </div>
-      <button id="scanBtn" class="scan-btn">Scan Current Tab</button>
+      <button id="scanBtn" class="scan-btn">Scan Monitored Tab</button>
     </div>
 
     <div class="export-section">
-      <button id="exportBtn" class="export-btn">Export Replay as GIF</button>
+      <button id="exportBtn" class="export-btn">Export Replay as PNG</button>
     </div>
   </div>
 
