@@ -82,16 +82,21 @@ const PhantomEngine = {
     }
 
     chrome.storage.onChanged.addListener((changes) => {
-      if (changes.phantom_settings) {
-        this.settings = changes.phantom_settings.newValue || this.settings;
-        const wasActive = this.active;
-        this.active = this.settings.phantomEnabled !== false;
-        if (this.active && !wasActive) {
-          this.enable();
-        } else if (!this.active && wasActive) {
-          this.disable();
+      try {
+        if (changes.phantom_settings) {
+          this.settings = changes.phantom_settings.newValue || this.settings;
+          const wasActive = this.active;
+          this.active = this.settings.phantomEnabled !== false;
+          if (this.active && !wasActive) {
+            this.enable();
+          } else if (!this.active && wasActive) {
+            this.disable();
+          }
+          this.broadcastState();
         }
-        this.broadcastState();
+      } catch (e) {
+        // Context invalidated or transient — either way, settings
+        // update failed. The engine keeps running with existing settings.
       }
     });
   },
@@ -123,25 +128,36 @@ const PhantomEngine = {
   },
 
   startSessionFlush() {
-    setInterval(() => {
-      if (!this.active) return;
-      const current = this.stats;
-      const last = this._lastFlushedStats || {
-        ghostMouseEvents: 0, phantomClicks: 0, scrollSpoofs: 0,
-        keystrokeEvents: 0, personaRotations: 0
-      };
-      const delta = {};
-      let hasChanges = false;
-      for (const key of ['ghostMouseEvents', 'phantomClicks', 'scrollSpoofs', 'keystrokeEvents', 'personaRotations']) {
-        delta[key] = (current[key] || 0) - (last[key] || 0);
-        if (delta[key] > 0) hasChanges = true;
+    this._flushInterval = setInterval(() => {
+      try {
+        if (!this.active) return;
+        const current = this.stats;
+        const last = this._lastFlushedStats || {
+          ghostMouseEvents: 0, phantomClicks: 0, scrollSpoofs: 0,
+          keystrokeEvents: 0, personaRotations: 0
+        };
+        const delta = {};
+        let hasChanges = false;
+        for (const key of ['ghostMouseEvents', 'phantomClicks', 'scrollSpoofs', 'keystrokeEvents', 'personaRotations']) {
+          delta[key] = (current[key] || 0) - (last[key] || 0);
+          if (delta[key] > 0) hasChanges = true;
+        }
+        if (hasChanges) {
+          chrome.runtime.sendMessage({ type: 'flushStats', stats: delta }, () => {
+            if (chrome.runtime.lastError) return;
+          });
+        }
+        this._lastFlushedStats = { ...current };
+      } catch (e) {
+        // Context invalidated — stop the interval so it doesn't spam.
+        // Do NOT set this.active = false — the noise engine doesn't need
+        // Chrome APIs to keep poisoning trackers. Only stat flushing dies.
+        if (e.message && e.message.includes('Extension context invalidated')) {
+          clearInterval(this._flushInterval);
+        }
+        // Transient errors (service worker dormancy, etc.): do nothing,
+        // the interval tries again in 30 seconds.
       }
-      if (hasChanges) {
-        chrome.runtime.sendMessage({ type: 'flushStats', stats: delta }, () => {
-          if (chrome.runtime.lastError) return;
-        });
-      }
-      this._lastFlushedStats = { ...current };
     }, 30000);
   },
 
@@ -234,7 +250,11 @@ const PhantomEngine = {
           this.broadcastState();
         }
       } catch (e) {
-        // Cycle error — wait and retry
+        if (e.message && e.message.includes('Extension context invalidated')) {
+          this.active = false;
+          return;
+        }
+        // Transient error (DOM churn, persona timing, etc.) — wait and retry
         await sleep(5000);
       }
 
@@ -271,18 +291,22 @@ const PhantomEngine = {
 
 // ---- Message handler for popup/dashboard communication ----
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === 'getPhantomStats') {
-    sendResponse(PhantomEngine.getStats());
-    return true;
-  }
-  if (msg.type === 'setPhantomActive') {
-    if (msg.active) {
-      PhantomEngine.enable();
-    } else {
-      PhantomEngine.disable();
+  try {
+    if (msg.type === 'getPhantomStats') {
+      sendResponse(PhantomEngine.getStats());
+      return true;
     }
-    sendResponse({ ok: true });
-    return true;
+    if (msg.type === 'setPhantomActive') {
+      if (msg.active) {
+        PhantomEngine.enable();
+      } else {
+        PhantomEngine.disable();
+      }
+      sendResponse({ ok: true });
+      return true;
+    }
+  } catch (e) {
+    // Context dead — nothing to respond to
   }
 });
 

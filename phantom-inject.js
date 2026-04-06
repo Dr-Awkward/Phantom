@@ -10,6 +10,12 @@
 
   var _addEventListener    = EventTarget.prototype.addEventListener;
   var _removeEventListener = EventTarget.prototype.removeEventListener;
+  var _toString            = Function.prototype.toString;
+
+  // Capture native toString representations BEFORE wrapping
+  var _nativeAEL      = _toString.call(_addEventListener);
+  var _nativeREL      = _toString.call(_removeEventListener);
+  var _nativeToString = _toString.call(_toString);
 
   var listenerMap = new WeakMap();
 
@@ -43,6 +49,7 @@
   // ---- Wrap addEventListener ----
 
   EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (new.target) throw new TypeError('Illegal invocation');
     if (POLICY_BLOCKED.has(type)) {
       try { return _addEventListener.call(this, type, listener, options); } catch(e) {}
       return;
@@ -78,6 +85,7 @@
   // ---- Wrap removeEventListener ----
 
   EventTarget.prototype.removeEventListener = function(type, listener, options) {
+    if (new.target) throw new TypeError('Illegal invocation');
     if (listenerMap.has(listener)) {
       var typeMap = listenerMap.get(listener);
       if (typeMap.has(type)) {
@@ -88,6 +96,36 @@
     }
     return _removeEventListener.call(this, type, listener, options);
   };
+
+  // ---- Anti-detection: property patches ----
+  // Native addEventListener has name="addEventListener" and length=2.
+  // Our wrapper inherits different values. Patch them to match.
+
+  Object.defineProperty(EventTarget.prototype.addEventListener, 'name',
+    { value: 'addEventListener', configurable: true });
+  Object.defineProperty(EventTarget.prototype.addEventListener, 'length',
+    { value: 2, configurable: true });
+  Object.defineProperty(EventTarget.prototype.removeEventListener, 'name',
+    { value: 'removeEventListener', configurable: true });
+  Object.defineProperty(EventTarget.prototype.removeEventListener, 'length',
+    { value: 2, configurable: true });
+
+  // ---- Anti-detection: toString spoofing ----
+  // Fingerprinting scripts check addEventListener.toString() for "[native code]".
+  // We override Function.prototype.toString to return the saved native strings
+  // for any function Phantom has replaced. The override also hides itself.
+
+  Function.prototype.toString = function toString() {
+    if (this === EventTarget.prototype.addEventListener) return _nativeAEL;
+    if (this === EventTarget.prototype.removeEventListener) return _nativeREL;
+    if (this === Function.prototype.toString) return _nativeToString;
+    return _toString.call(this);
+  };
+
+  Object.defineProperty(Function.prototype.toString, 'name',
+    { value: 'toString', configurable: true });
+  Object.defineProperty(Function.prototype.toString, 'length',
+    { value: 0, configurable: true });
 
   // ---- Noise helpers ----
 
