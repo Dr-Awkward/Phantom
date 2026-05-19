@@ -12,3 +12,4 @@ try_this.md
 HOW_TO_VERIFY.md
 Phantom-V2.0..0.1.zip
 QA.md
+.github/workflows/release.yml
