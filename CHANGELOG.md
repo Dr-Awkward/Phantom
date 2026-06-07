@@ -2,6 +2,19 @@
 
 All notable changes to Phantom are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.1] - 2026-06-07
+
+### Fixed
+- Options page and Exposure Dashboard now render remote whitelist domains, tracker names, and diagnostic details as plain text instead of HTML — defense-in-depth against injection through fetched or bundled data.
+- LICENSE preamble replaced with the standard GPL v3 grant text.
+
+### Changed
+- Manifest now declares `minimum_chrome_version` 111. Older Chrome can't run MAIN-world content scripts, so Phantom would have silently failed there.
+- README install steps clarified for first-time users: zip extraction on Windows/Mac, and a warning that the extension folder must stay in place after loading.
+
+### Added
+- GitHub Actions release workflow: builds `phantom.zip` from an allowlist, enforces a 200KB size cap, publishes the SHA256, and refuses to release without a matching changelog entry. The LICENSE file is now bundled in the zip.
+
 ## [2.0.0] - 2026-04-01
 
 First public release.
