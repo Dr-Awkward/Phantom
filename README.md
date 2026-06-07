@@ -44,11 +44,13 @@ A service worker (`background.js`) handles ghost search scheduling, RSS query ev
 ## Install
 
 1. Download the latest `.zip` from [phantom.farehard.com](https://phantom.farehard.com) or [GitHub Releases](https://github.com/Dr-Awkward/phantom/releases)
-2. Extract it to a folder on your computer
+2. Extract it to a folder on your computer — on Windows, right-click the zip and choose **Extract All**; on Mac, double-click it. Don't skip this step: Chrome can't load the extension from inside the zip itself.
 3. Open Chrome and go to `chrome://extensions`
 4. Turn on **Developer mode** (toggle in the top-right corner)
 5. Click **Load unpacked** and select the extracted folder
 6. Click the puzzle piece icon in the toolbar to pin Phantom
+
+> **Keep the folder where it is.** Chrome loads Phantom from that folder every time it starts — if you move, rename, or delete it, the extension stops working. Pick a permanent spot (like `Documents/Phantom`) before loading it.
 
 ### Update
 
@@ -101,4 +103,4 @@ GPL v3 — see [LICENSE](LICENSE) for details.
 If Phantom is useful to you, consider supporting development:
 
 - [phantom.farehard.com](https://phantom.farehard.com)
-- [GitHub Sponsors](https://github.com/Dr-Awkward/phantom)
+- [GitHub Sponsors](https://github.com/sponsors/Dr-Awkward)

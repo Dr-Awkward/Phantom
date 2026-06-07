@@ -1,0 +1,89 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify manifest version matches tag
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
+          echo "Tag version:      $TAG_VERSION"
+          echo "Manifest version: $MANIFEST_VERSION"
+          if [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "ERROR: tag $GITHUB_REF_NAME does not match manifest.json version $MANIFEST_VERSION"
+            exit 1
+          fi
+
+      - name: Build phantom.zip (allowlist)
+        run: |
+          mkdir -p build/icons
+          cp manifest.json build/
+          cp background.js popup.html popup.js options.html options.js build/
+          cp dashboard.html dashboard.js dashboard.css build/
+          cp phantom.js phantom-inject.js phantom-mouse.js phantom-scroll.js \
+             phantom-click.js phantom-hover.js phantom-keystroke.js phantom-persona.js build/
+          cp seeds.json tracker-signatures.json whitelist.json build/
+          cp LICENSE build/
+          cp icons/icon16.png icons/icon32.png icons/icon48.png icons/icon128.png build/icons/
+          cd build
+          zip -r ../phantom.zip .
+          cd ..
+          echo "--- contents ---"
+          unzip -l phantom.zip
+
+      - name: Verify zip size (<200KB)
+        run: |
+          SIZE=$(stat -c%s phantom.zip)
+          echo "Zip size: $SIZE bytes"
+          if [ "$SIZE" -gt 204800 ]; then
+            echo "ERROR: phantom.zip exceeds 200KB. Something leaked into the build."
+            exit 1
+          fi
+
+      - name: Compute SHA256
+        id: sha
+        run: |
+          SHA=$(sha256sum phantom.zip | awk '{print $1}')
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "SHA256: $SHA"
+
+      - name: Extract changelog block for this version
+        id: changelog
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; print; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "ERROR: no CHANGELOG entry found for version $VERSION"
+            exit 1
+          fi
+          {
+            echo ""
+            echo "---"
+            echo ""
+            echo "**SHA256** \`${{ steps.sha.outputs.sha }}\`"
+            echo ""
+            echo "**Install:** download \`phantom.zip\`, extract, then in Chrome go to \`chrome://extensions\` → enable Developer mode → Load unpacked → pick the extracted folder."
+          } >> release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Phantom ${{ github.ref_name }}
+          body_path: release-notes.md
+          files: phantom.zip
+          fail_on_unmatched_files: true

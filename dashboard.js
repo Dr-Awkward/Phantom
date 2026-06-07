@@ -301,12 +301,18 @@ document.getElementById('scanBtn').addEventListener('click', async () => {
       found++;
       const item = document.createElement('div');
       item.className = 'tracker-item';
-      item.innerHTML = `
-        <span class="tracker-icon">&#9888;</span>
-        <span class="tracker-name">${tracker.name}</span>
-        <span class="tracker-desc">— ${tracker.collects}</span>
-        <span class="tracker-poisoned">Poisoned</span>
-      `;
+      const parts = [
+        ['tracker-icon', '⚠'],
+        ['tracker-name', tracker.name],
+        ['tracker-desc', '— ' + tracker.collects],
+        ['tracker-poisoned', 'Poisoned']
+      ];
+      for (const [cls, text] of parts) {
+        const span = document.createElement('span');
+        span.className = cls;
+        span.textContent = text;
+        item.appendChild(span);
+      }
       listEl.appendChild(item);
     }
   }
@@ -456,14 +462,24 @@ async function runDiagnostic() {
   let failCount = 0;
 
   for (const check of checks) {
-    const icon = check.pass === true ? '&#10003;' : check.pass === false ? '&#10007;' : '&#9679;';
+    const icon = check.pass === true ? '✓' : check.pass === false ? '✗' : '●';
     const cls  = check.pass === true ? 'pass' : check.pass === false ? 'fail' : 'warn';
     if (check.pass === true) passCount++;
     if (check.pass === false) failCount++;
 
     const row = document.createElement('div');
     row.className = 'diag-row';
-    row.innerHTML = `<span class="diag-icon ${cls}">${icon}</span><span class="diag-label">${check.label}</span><span class="diag-detail">${check.detail}</span>`;
+    const parts = [
+      ['diag-icon ' + cls, icon],
+      ['diag-label', check.label],
+      ['diag-detail', check.detail]
+    ];
+    for (const [spanCls, text] of parts) {
+      const span = document.createElement('span');
+      span.className = spanCls;
+      span.textContent = text;
+      row.appendChild(span);
+    }
     resultsEl.appendChild(row);
   }
 

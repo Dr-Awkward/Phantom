@@ -91,7 +91,12 @@ chrome.runtime.sendMessage({ type: 'getWhitelist' }, (data) => {
     el.textContent = 'No community whitelist loaded yet.';
     return;
   }
-  el.innerHTML = data.remote.map(d => '<span>' + d + '</span>').join('');
+  el.textContent = '';
+  for (const d of data.remote) {
+    const span = document.createElement('span');
+    span.textContent = d;
+    el.appendChild(span);
+  }
 });
 
 // Auto-save on any change
