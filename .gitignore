@@ -1,14 +1,28 @@
+# Build artifacts (the release workflow creates these locally)
+build/
+*.zip
+
+# Local Claude Code config
 .claude/settings.local.json
-627c8733-f9c2-4eba-8f2b-aaaa4fc8d1d8.jpg
-627c8733-f9c2-4eba-8f2b-aaaa4fc8d1d8.png
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# Internal dev docs and working notes (not shipped, not published)
 CLAUDE.md
+HOW_TO_VERIFY.md
+QA.md
 TrackMeNot-V2-Spec.md
 next_steps.md
-phantom-v2.0.0.zip
 remote.md
-tests.pdf
 triage.md
 try_this.md
-HOW_TO_VERIFY.md
-Phantom-V2.0..0.1.zip
-QA.md
+tests.pdf
+
+# Large source/mockup images kept locally but not tracked
+627c8733-f9c2-4eba-8f2b-aaaa4fc8d1d8.jpg
+627c8733-f9c2-4eba-8f2b-aaaa4fc8d1d8.png
