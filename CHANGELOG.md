@@ -2,6 +2,13 @@
 
 All notable changes to Phantom are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.3] - 2026-06-09
+
+### Changed
+- Maintenance release. No changes to extension behavior. Version numbers and the
+  release pipeline were brought back in sync so automated GitHub Releases build
+  and publish correctly.
+
 ## [2.0.1] - 2026-06-07
 
 ### Fixed
