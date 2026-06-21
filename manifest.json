@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Phantom",
-  "version": "2.0.3",
+  "version": "2.2.0",
   "minimum_chrome_version": "111",
-  "description": "Protects your privacy by hiding your real searches in decoy traffic and injecting behavioral noise that makes tracking scripts unable to profile you.",
+  "description": "Protects your privacy by hiding your real searches in decoy traffic and injecting behavioral noise that makes you much harder for tracking scripts to profile.",
   "permissions": [
     "storage",
     "alarms",

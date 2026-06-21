@@ -67,13 +67,32 @@ const PhantomEngine = {
       return;
     }
 
+    // Stand down on pages running aggressive bot-detection / fingerprinting.
+    // There the noise is filtered (isTrusted:false) AND can feed a bot/fraud
+    // score, so injecting is pure downside. Top frame only, to bound cost.
+    if (this.active && window === window.top) {
+      try {
+        const suppressPatterns = await this.loadSuppressPatterns();
+        if (suppressPatterns.length && this.pageUsesAny(suppressPatterns)) {
+          this.active = false;
+          this.broadcastState();
+          return;
+        }
+        this.watchForHostile(suppressPatterns);
+      } catch (e) {
+        // Detection is best-effort; never block activation on its failure.
+      }
+    }
+
     if (this.active) {
       PersonaEngine.generate();
       this.stats.personaRotations = 1;
       this.broadcastState();
       this.startActivityCycle();
 
-      // Record mouse positions for dashboard replay
+      // Record mouse positions for dashboard replay. Synthetic events are always
+      // isTrusted:false (unforgeable in Chrome) and real input is isTrusted:true,
+      // so this cleanly separates ghost from real.
       document.addEventListener('mousemove', (e) => {
         this.recordPosition(e.clientX, e.clientY, !e.isTrusted);
       }, true);
@@ -99,6 +118,51 @@ const PhantomEngine = {
         // update failed. The engine keeps running with existing settings.
       }
     });
+  },
+
+  // ---- Bot-detection stand-down ----
+  // Phantom's synthetic events can't fool isTrusted, and on aggressive anti-bot /
+  // fingerprinting systems they can actively raise a bot score. Where a tracker
+  // is flagged `suppress` in tracker-signatures.json, we disable injection.
+
+  async loadSuppressPatterns() {
+    try {
+      const url = chrome.runtime.getURL('tracker-signatures.json');
+      const data = await (await fetch(url)).json();
+      return (data.trackers || [])
+        .filter(t => t.suppress === true)
+        .reduce((acc, t) => acc.concat(t.patterns || []), []);
+    } catch (e) {
+      return [];
+    }
+  },
+
+  pageResourceUrls() {
+    const urls = [];
+    try { document.querySelectorAll('script[src]').forEach(s => urls.push(s.src)); } catch (e) {}
+    try { performance.getEntriesByType('resource').forEach(r => urls.push(r.name)); } catch (e) {}
+    return urls;
+  },
+
+  pageUsesAny(patterns) {
+    const urls = this.pageResourceUrls();
+    return patterns.some(p => urls.some(u => u.indexOf(p) !== -1));
+  },
+
+  watchForHostile(patterns) {
+    if (!patterns || !patterns.length || typeof PerformanceObserver === 'undefined') return;
+    try {
+      const obs = new PerformanceObserver((list) => {
+        const hit = list.getEntries().some(e =>
+          patterns.some(p => (e.name || '').indexOf(p) !== -1));
+        if (hit && this.active) {
+          obs.disconnect();
+          this.disable();  // stand down; broadcasts state to the MAIN world
+        }
+      });
+      obs.observe({ type: 'resource', buffered: false });
+      this._hostileObserver = obs;
+    } catch (e) {}
   },
 
   // ---- Send state to the MAIN-world interception layer ----
@@ -204,7 +268,11 @@ const PhantomEngine = {
               );
               for (const point of path) {
                 if (!this.active) return;
-                const event = MouseSynth.createMouseEvent('mousemove', point.x, point.y);
+                // movementX/Y must match the real step delta — a constant
+                // random value contradicts the position and flags the event.
+                const movementX = point.x - MouseSynth.ghostX;
+                const movementY = point.y - MouseSynth.ghostY;
+                const event = MouseSynth.createMouseEvent('mousemove', point.x, point.y, null, movementX, movementY);
                 const target = document.elementFromPoint(point.x, point.y);
                 if (target) target.dispatchEvent(event);
                 MouseSynth.ghostX = point.x;

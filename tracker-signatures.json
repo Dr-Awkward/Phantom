@@ -1,104 +1,213 @@
 {
+  "_comment": "category + noiseEffective + suppress drive the Exposure Dashboard verdict and the content-script stand-down. noiseEffective:false means the tracker filters synthetic events (isTrusted:false), so Phantom's noise does not reach it. suppress:true means Phantom disables behavioral injection on pages running it, because the noise is both filtered AND can feed a bot/fraud score (pure downside). Captcha widgets are noiseEffective:false but suppress:false (too common to disable everywhere; they still filter our noise).",
   "trackers": [
     {
       "name": "Google Analytics",
       "patterns": ["google-analytics.com/analytics", "googletagmanager.com/gtag", "ga.js", "gtag.js", "analytics.js"],
-      "collects": "Pageviews, events, user timing, demographics"
+      "collects": "Pageviews, events, user timing, demographics",
+      "category": "analytics",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Google Tag Manager",
       "patterns": ["googletagmanager.com/gtm.js"],
-      "collects": "Triggers and routes data to other analytics services"
+      "collects": "Triggers and routes data to other analytics services",
+      "category": "analytics",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Facebook Pixel",
       "patterns": ["connect.facebook.net/en_US/fbevents.js", "facebook.com/tr"],
-      "collects": "Conversions, page views, custom events, behavioral data"
+      "collects": "Conversions, page views, custom events, behavioral data",
+      "category": "advertising",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Hotjar",
       "patterns": ["static.hotjar.com", "hotjar.js", "hotjar.com/c/hotjar"],
-      "collects": "Session replay, heatmaps, click maps, scroll depth"
+      "collects": "Session replay, heatmaps, click maps, scroll depth",
+      "category": "session-replay",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "FullStory",
       "patterns": ["fullstory.com/s/fs.js", "edge.fullstory.com"],
-      "collects": "Full session replay, mouse movement, clicks, form interactions"
+      "collects": "Full session replay, mouse movement, clicks, form interactions",
+      "category": "session-replay",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Microsoft Clarity",
       "patterns": ["clarity.ms/tag", "clarity.ms/s"],
-      "collects": "Session replay, heatmaps, scroll depth, rage clicks"
+      "collects": "Session replay, heatmaps, scroll depth, rage clicks",
+      "category": "session-replay",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Mixpanel",
       "patterns": ["cdn.mxpnl.com", "mixpanel.com/track"],
-      "collects": "Events, user profiles, funnels, retention"
+      "collects": "Events, user profiles, funnels, retention",
+      "category": "analytics",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Segment",
       "patterns": ["cdn.segment.com/analytics.js", "api.segment.io"],
-      "collects": "Events routed to multiple downstream analytics tools"
+      "collects": "Events routed to multiple downstream analytics tools",
+      "category": "analytics",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Heap Analytics",
       "patterns": ["heap-analytics.com", "heapanalytics.com/js"],
-      "collects": "Auto-captured clicks, pageviews, form submissions"
+      "collects": "Auto-captured clicks, pageviews, form submissions",
+      "category": "analytics",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Amplitude",
       "patterns": ["cdn.amplitude.com", "api.amplitude.com"],
-      "collects": "Events, user properties, behavioral cohorts"
+      "collects": "Events, user properties, behavioral cohorts",
+      "category": "analytics",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Lucky Orange",
       "patterns": ["luckyorange.com", "luckyorange.net"],
-      "collects": "Session recordings, heatmaps, chat, form analytics"
+      "collects": "Session recordings, heatmaps, chat, form analytics",
+      "category": "session-replay",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Mouseflow",
       "patterns": ["mouseflow.com/projects", "cdn.mouseflow.com"],
-      "collects": "Session replay, heatmaps, funnels, form analytics"
+      "collects": "Session replay, heatmaps, funnels, form analytics",
+      "category": "session-replay",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Crazy Egg",
       "patterns": ["script.crazyegg.com", "crazyegg.com/pages"],
-      "collects": "Heatmaps, scroll maps, click reports, session recordings"
+      "collects": "Heatmaps, scroll maps, click reports, session recordings",
+      "category": "session-replay",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Adobe Analytics",
       "patterns": ["omtrdc.net", "demdex.net", "2o7.net"],
-      "collects": "Pageviews, events, visitor profiles, segmentation"
+      "collects": "Pageviews, events, visitor profiles, segmentation",
+      "category": "analytics",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Pendo",
       "patterns": ["pendo.io/agent", "cdn.pendo.io"],
-      "collects": "Product usage, feature adoption, user guides"
+      "collects": "Product usage, feature adoption, user guides",
+      "category": "product",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Intercom",
       "patterns": ["widget.intercom.io", "intercom.io/widget"],
-      "collects": "User identity, page visits, conversation data"
+      "collects": "User identity, page visits, conversation data",
+      "category": "product",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Hubspot",
       "patterns": ["js.hs-scripts.com", "js.hs-analytics.net", "hubspot.com/analytics"],
-      "collects": "Page views, form submissions, email tracking"
+      "collects": "Page views, form submissions, email tracking",
+      "category": "analytics",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "Snapchat Pixel",
       "patterns": ["sc-static.net/scevent.min.js"],
-      "collects": "Conversions, page views, behavioral events"
+      "collects": "Conversions, page views, behavioral events",
+      "category": "advertising",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "TikTok Pixel",
       "patterns": ["analytics.tiktok.com"],
-      "collects": "Conversions, page views, click events"
+      "collects": "Conversions, page views, click events",
+      "category": "advertising",
+      "noiseEffective": true,
+      "suppress": false
     },
     {
       "name": "LinkedIn Insight",
       "patterns": ["snap.licdn.com/li.lms-analytics"],
-      "collects": "Page views, conversions, demographic targeting"
+      "collects": "Page views, conversions, demographic targeting",
+      "category": "advertising",
+      "noiseEffective": true,
+      "suppress": false
+    },
+    {
+      "name": "Google reCAPTCHA",
+      "patterns": ["www.google.com/recaptcha", "gstatic.com/recaptcha", "recaptcha.net/recaptcha"],
+      "collects": "Bot scoring from behavioral signals (v3 runs continuously)",
+      "category": "captcha",
+      "noiseEffective": false,
+      "suppress": false
+    },
+    {
+      "name": "hCaptcha",
+      "patterns": ["js.hcaptcha.com", "hcaptcha.com/1/api.js"],
+      "collects": "Bot scoring and challenges from behavioral signals",
+      "category": "captcha",
+      "noiseEffective": false,
+      "suppress": false
+    },
+    {
+      "name": "Cloudflare Bot Management",
+      "patterns": ["challenges.cloudflare.com", "/cdn-cgi/challenge-platform"],
+      "collects": "Bot detection, behavioral challenges, device fingerprinting",
+      "category": "anti-bot",
+      "noiseEffective": false,
+      "suppress": true
+    },
+    {
+      "name": "DataDome",
+      "patterns": ["js.datadome.co", "captcha.datadome.co"],
+      "collects": "Bot/fraud detection from behavior and device fingerprinting",
+      "category": "anti-bot",
+      "noiseEffective": false,
+      "suppress": true
+    },
+    {
+      "name": "HUMAN (PerimeterX)",
+      "patterns": ["client.perimeterx.net", "px-cdn.net", "px-cloud.net"],
+      "collects": "Bot/fraud detection from behavioral biometrics",
+      "category": "anti-bot",
+      "noiseEffective": false,
+      "suppress": true
+    },
+    {
+      "name": "FingerprintJS",
+      "patterns": ["fpjs.io", "fpnpmcdn.net", "cdn.fpjs.io"],
+      "collects": "Device/browser fingerprinting and visitor identification",
+      "category": "fingerprinting",
+      "noiseEffective": false,
+      "suppress": true
     }
   ]
 }

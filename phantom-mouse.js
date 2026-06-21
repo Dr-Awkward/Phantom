@@ -84,7 +84,7 @@ const MouseSynth = {
     return strategy() || { x: window.innerWidth / 2, y: window.innerHeight / 2 };
   },
 
-  createMouseEvent(type, x, y, realEvent) {
+  createMouseEvent(type, x, y, realEvent, movementX, movementY) {
     return new MouseEvent(type, {
       bubbles: true,
       cancelable: true,
@@ -93,8 +93,8 @@ const MouseSynth = {
       clientY: y,
       screenX: x + (window.screenX || 0),
       screenY: y + (window.screenY || 0) + 80,
-      movementX: (Math.random() - 0.5) * 4,
-      movementY: (Math.random() - 0.5) * 4,
+      movementX: typeof movementX === 'number' ? movementX : (Math.random() - 0.5) * 4,
+      movementY: typeof movementY === 'number' ? movementY : (Math.random() - 0.5) * 4,
       button: type === 'click' ? 0 : (realEvent ? realEvent.button : 0),
       buttons: type === 'mousemove' ? 1 : 0,
       ctrlKey:  realEvent ? realEvent.ctrlKey  : false,

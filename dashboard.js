@@ -299,20 +299,39 @@ document.getElementById('scanBtn').addEventListener('click', async () => {
     );
     if (matched) {
       found++;
+      const effective = tracker.noiseEffective !== false;
       const item = document.createElement('div');
       item.className = 'tracker-item';
-      const parts = [
+
+      const base = [
         ['tracker-icon', '⚠'],
         ['tracker-name', tracker.name],
-        ['tracker-desc', '— ' + tracker.collects],
-        ['tracker-poisoned', 'Poisoned']
+        ['tracker-desc', '— ' + tracker.collects]
       ];
-      for (const [cls, text] of parts) {
+      for (const [cls, text] of base) {
         const span = document.createElement('span');
         span.className = cls;
         span.textContent = text;
         item.appendChild(span);
       }
+
+      // Honest verdict: only claim a win where the noise actually reaches the
+      // tracker. Anything that filters synthetic input (isTrusted:false) is shown
+      // as "not affected" rather than "poisoned".
+      const verdict = document.createElement('span');
+      verdict.className = 'tracker-poisoned';
+      if (effective) {
+        verdict.textContent = 'Poisoned';
+      } else {
+        verdict.style.color = '#8b949e';
+        verdict.style.background = 'transparent';
+        verdict.style.border = '1px solid #30363d';
+        verdict.textContent = tracker.suppress
+          ? 'Not affected — Phantom stands down here'
+          : 'Not affected — filters synthetic input';
+      }
+      item.appendChild(verdict);
+
       listEl.appendChild(item);
     }
   }

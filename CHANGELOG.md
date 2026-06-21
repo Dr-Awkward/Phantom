@@ -2,6 +2,40 @@
 
 All notable changes to Phantom are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.2.0] - 2026-06-21
+
+### Changed
+- Interception-path mouse noise no longer teleports 200-300px from the real cursor in a single
+  event. It now walks a continuous, velocity-limited path with `movementX/movementY` matching each
+  step, so the ghost cursor reads like a hand instead of a scripted jump. This makes the noise more
+  convincing to trackers that actually ingest it (heatmap, session-replay, and analytics tools that
+  record raw events).
+- Orchestrator-dispatched mouse moves now carry `movementX/movementY` consistent with their position
+  delta, for the same reason.
+
+### Notes
+- `isTrusted` is **not** spoofed, because it cannot be. In Chrome it is a non-configurable own
+  property on every event instance (`[LegacyUnforgeable]`): `defineProperty` throws and there is no
+  prototype accessor to override, so a scripted event cannot be made to look trusted from page JS.
+  A tracker that runs `if (!e.isTrusted) return;` discards all of Phantom's synthetic events; the
+  noise therefore only reaches trackers that do not check the flag (in practice, much analytics and
+  heatmap tooling). The only way to emit genuinely trusted events is real user input or
+  `chrome.debugger`/CDP, which Phantom does not use. An earlier attempt to spoof `isTrusted` was
+  removed once verified impossible in Chrome.
+
+### Added
+- Tracker intelligence: `tracker-signatures.json` now classifies each tracker (analytics,
+  session-replay, advertising, captcha, anti-bot, fingerprinting) and records whether the noise
+  reaches it. The Exposure Dashboard shows an honest per-tracker verdict — "Poisoned" for tools that
+  ingest raw events, "Not affected" for those that filter synthetic input (`isTrusted`).
+- Bot-detection stand-down: on pages running aggressive anti-bot / fingerprinting systems (Cloudflare
+  Bot Management, DataDome, HUMAN/PerimeterX, FingerprintJS), the content script now disables
+  behavioral injection entirely — the noise is filtered there and can raise a bot/fraud score against
+  the user. Detection is top-frame, via resource-URL match plus a `PerformanceObserver` for
+  late-loading scripts.
+- Unit tests covering trajectory continuity and movement-delta consistency, plus a regression test
+  that pins the `isTrusted` limit (synthetic events stay untrusted; the flag is unforgeable).
+
 ## [2.0.3] - 2026-06-09
 
 ### Changed

@@ -329,6 +329,50 @@ describe('Manifest Structure', () => {
   });
 });
 
+// ---- Behavioral noise: what actually holds ----
+// Honest scope. isTrusted CANNOT be spoofed in Chrome: it is a non-configurable
+// own property on every event instance ([LegacyUnforgeable]), so defineProperty
+// throws and there is no prototype accessor to override. A tracker that gates on
+// `if (!e.isTrusted) return;` therefore drops 100% of Phantom's synthetic events;
+// the noise only reaches trackers that do NOT check the flag. These tests pin
+// that limit, and verify what Phantom CAN do: emit a continuous, human-scale
+// ghost trajectory with consistent movement deltas.
+
+describe('Behavioral Noise (what actually holds)', () => {
+
+  it('synthetic events are isTrusted:false and the flag is unforgeable (Chrome)', () => {
+    const e = MouseSynth.createMouseEvent('mousemove', 5, 5);
+    assert(e.isTrusted === false, 'a scripted event is never trusted');
+    // isTrusted is a non-configurable own property, so this must throw.
+    let threw = false;
+    try { Object.defineProperty(e, 'isTrusted', { value: true, configurable: true }); }
+    catch (_) { threw = true; }
+    assert(threw === true, 'isTrusted must be unforgeable from page JS');
+    assert(e.isTrusted === false, 'and it stays false');
+  });
+
+  it('ghost mouse trajectory is continuous — no teleports', () => {
+    // The old inject path jumped 200-300px in one event; a real path does not.
+    // A tracker that ingests the noise checks frame-to-frame velocity.
+    let worst = 0;
+    for (let run = 0; run < 10; run++) {
+      const path = MouseSynth.generatePath(100, 100, 700, 500, 25);
+      for (let i = 1; i < path.length; i++) {
+        const d = Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
+        if (d > worst) worst = d;
+      }
+    }
+    assert(worst < 120, `Trajectory has an implausible ${Math.round(worst)}px jump`);
+  });
+
+  it('ghost mousemove movement deltas match the position step', () => {
+    // movementX/Y must equal the real per-step delta, not a random constant, or a
+    // tracker can separate ghost moves from real ones on the inconsistency alone.
+    const e = MouseSynth.createMouseEvent('mousemove', 100, 100, null, 7, -3);
+    assert(e.movementX === 7 && e.movementY === -3, 'explicit movement deltas should be honored');
+  });
+});
+
 // ============================================================
 // Run all tests
 // ============================================================
